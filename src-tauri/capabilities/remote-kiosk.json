@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "remote-kiosk",
+  "description": "Allow the deployed QuokkaQ web app to invoke native print (edit remote.urls for your domain).",
+  "windows": ["main"],
+  "remote": {
+    "urls": [
+      "https://*.quokkaq.v-b.tech",
+      "https://quokkaq.v-b.tech",
+      "https://app.quokkaq.v-b.tech",
+      "http://localhost:*",
+      "http://127.0.0.1:*"
+    ]
+  },
+  "permissions": ["core:default", "allow-print-receipt"]
+}

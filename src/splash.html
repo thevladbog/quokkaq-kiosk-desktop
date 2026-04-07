@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>QuokkaQ Kiosk</title>
+    <style>
+      :root {
+        --bg: #0f1419;
+        --card: #1a2332;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --accent-dim: rgba(56, 189, 248, 0.25);
+        --radius: 12px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+        background: radial-gradient(
+            ellipse 80% 60% at 50% -20%,
+            rgba(56, 189, 248, 0.12),
+            transparent
+          ),
+          var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .mascot {
+        width: min(200px, 42vw);
+        height: auto;
+        filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+      }
+      .card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--card);
+        border-radius: var(--radius);
+        padding: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      }
+      h1 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0 0 6px;
+      }
+      .sub {
+        font-size: 0.875rem;
+        color: var(--muted);
+        margin: 0 0 20px;
+        line-height: 1.45;
+      }
+      label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 20, 25, 0.6);
+        color: var(--text);
+        font-size: 0.9375rem;
+        margin-bottom: 16px;
+      }
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
+      button {
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .error {
+        color: #f87171;
+        font-size: 0.8125rem;
+        margin-top: 12px;
+        line-height: 1.4;
+      }
+      .progress-wrap {
+        margin-top: 24px;
+        max-width: 420px;
+        width: 100%;
+      }
+      .progress-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .progress-track {
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.15);
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--accent), #818cf8);
+        transition: width 0.35s ease;
+      }
+      .progress-bar.indeterminate {
+        width: 40% !important;
+        animation: slide 1.2s ease-in-out infinite;
+      }
+      @keyframes slide {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(350%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="brand">
+      <img
+        class="mascot"
+        src="splash-assets/quokka-logo.svg"
+        alt=""
+        width="200"
+        height="200"
+      />
+    </div>
+
+    <div class="card">
+      <h1>Connect this kiosk</h1>
+      <p class="sub">
+        Enter your API base URL (same host the backend uses) and the pairing
+        code from Admin → Desktop terminals.
+      </p>
+      <form id="form">
+        <label for="api">API base URL</label>
+        <input
+          id="api"
+          name="api"
+          type="url"
+          placeholder="https://api.example.com"
+          autocomplete="off"
+          required
+        />
+        <label for="code">Terminal pairing code</label>
+        <input
+          id="code"
+          name="code"
+          type="text"
+          placeholder="10-character code"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" id="submit">Connect</button>
+        <div class="error" id="err" hidden></div>
+      </form>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label" id="prog-label">Starting…</div>
+      <div class="progress-track">
+        <div class="progress-bar" id="prog-bar"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var bar = document.getElementById('prog-bar');
+        var label = document.getElementById('prog-label');
+        var steps = [
+          { pct: 22, text: 'Starting print agent…' },
+          { pct: 48, text: 'Loading configuration…' },
+          { pct: 72, text: 'Almost ready…' },
+          { pct: 100, text: 'Done' }
+        ];
+        var i = 0;
+        function tick() {
+          if (i >= steps.length) return;
+          bar.style.width = steps[i].pct + '%';
+          label.textContent = steps[i].text;
+          i++;
+          setTimeout(tick, i < steps.length ? 450 : 0);
+        }
+        tick();
+
+        var form = document.getElementById('form');
+        var err = document.getElementById('err');
+        var submit = document.getElementById('submit');
+
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          err.hidden = true;
+          var api = document.getElementById('api').value.trim();
+          var code = document.getElementById('code').value.trim();
+          if (!api || !code) return;
+
+          var tauri = window.__TAURI__;
+          if (!tauri || !tauri.core || !tauri.core.invoke) {
+            err.textContent =
+              'Tauri API not available. Open this app from the QuokkaQ Kiosk desktop build.';
+            err.hidden = false;
+            return;
+          }
+
+          submit.disabled = true;
+          bar.classList.add('indeterminate');
+          label.textContent = 'Connecting to API…';
+
+          try {
+            await tauri.core.invoke('pair_terminal', {
+              args: {
+                apiBaseUrl: api,
+                pairingCode: code
+              }
+            });
+            label.textContent = 'Opening kiosk…';
+          } catch (ex) {
+            bar.classList.remove('indeterminate');
+            err.textContent =
+              (ex && (ex.message || String(ex))) || 'Connection failed';
+            err.hidden = false;
+            submit.disabled = false;
+            label.textContent = 'Could not connect';
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

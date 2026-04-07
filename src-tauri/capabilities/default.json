@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Local sidecar and core APIs for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "allow-print-receipt",
+    "allow-desktop-pairing",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "binaries/quokkaq-kiosk-agent",
+          "sidecar": true,
+          "args": true
+        }
+      ]
+    }
+  ]
+}

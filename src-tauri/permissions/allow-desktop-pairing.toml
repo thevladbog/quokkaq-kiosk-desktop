@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-desktop-pairing"
+description = "Pair the kiosk shell with the API using a terminal code and persist desktop-profile.json."
+commands.allow = ["pair_terminal"]
