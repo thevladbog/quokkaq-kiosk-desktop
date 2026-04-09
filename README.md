@@ -1,3 +1,5 @@
+> **Archived:** This repository is archived and no longer maintained. Active development continues in the monorepo **[thevladbog/quokkaq](https://github.com/thevladbog/quokkaq)**. The kiosk desktop app now lives under [`apps/kiosk-desktop`](https://github.com/thevladbog/quokkaq/tree/main/apps/kiosk-desktop).
+
 # QuokkaQ Kiosk (desktop)
 
 Tauri 2 shell that opens the **hosted** Next.js kiosk in a webview (same `/[locale]/kiosk/[unitId]` URLs as the browser). A small **Go sidecar** listens on `127.0.0.1:17431` and forwards raw ESC/POS bytes to a TCP printer (network receipt printers, port 9100 by default).
